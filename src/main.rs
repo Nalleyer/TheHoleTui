@@ -12,10 +12,39 @@ use crossterm::{
 };
 
 use tui::{backend::CrosstermBackend, Terminal};
-
-use crossterm::terminal::LeaveAlternateScreen;
+use tui::widgets::{Widget, Block, Borders};
+use tui::layout::{Layout, Constraint, Direction};
 
 
 fn main() -> Result<(), Error> {
-    Ok(())
+    let stdout = stdout();
+    let backend = CrosstermBackend::new(stdout);
+    let mut terminal = Terminal::new(backend)?;
+    terminal.clear()?;
+    enable_raw_mode().expect("try enable raw mode");
+    terminal.draw(|mut f| {
+        let chunks = Layout::default()
+            .direction(Direction::Horizontal)
+            .margin(1)
+            .constraints(
+                [
+                    Constraint::Percentage(10),
+                    Constraint::Percentage(80),
+                    Constraint::Percentage(10)
+                ].as_ref()
+            )
+            .split(f.size());
+        Block::default()
+             .title("Block")
+             .borders(Borders::ALL)
+             .render(&mut f, chunks[0]);
+        Block::default()
+             .title("Block 1")
+             .borders(Borders::ALL)
+             .render(&mut f, chunks[1]);
+        Block::default()
+             .title("Block 2")
+             .borders(Borders::ALL)
+             .render(&mut f, chunks[2]);
+    })
 }
