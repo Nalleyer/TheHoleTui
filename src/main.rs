@@ -6,7 +6,6 @@ use std::{
 };
 
 use crossterm::{
-    event::{self, Event as CEvent, KeyCode},
     execute,
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen},
 };
@@ -15,6 +14,28 @@ use tui::layout::{Constraint, Direction, Layout};
 use tui::widgets::{Block, Borders, Widget};
 use tui::{backend::CrosstermBackend, Terminal};
 
+mod input;
+use input::{read_input, Input};
+
+fn main_loop() -> Result<(), Error> {
+    loop {
+        if let Some(e) = read_input() {
+            if e == Input::Quit {
+                break
+            }
+            println!("{:?}", e);
+            // write input to world
+            // dispatch world
+            render_game()?;
+        }
+    }
+    Ok(())
+}
+
+fn render_game() -> Result<(), Error> {
+    Ok(())
+}
+
 fn main() -> Result<(), Error> {
     let stdout = stdout();
     let backend = CrosstermBackend::new(stdout);
@@ -22,34 +43,5 @@ fn main() -> Result<(), Error> {
     terminal.clear()?;
     // enable_raw_mode().expect("try enable raw mode");
     terminal.hide_cursor()?;
-    let mut odd = true;
-    loop {
-        odd = !odd;
-        terminal.draw(|mut f| {
-            let chunks = Layout::default()
-                .direction(Direction::Horizontal)
-                .margin(1)
-                .constraints(
-                    [
-                        Constraint::Percentage(10),
-                        Constraint::Percentage(80),
-                        Constraint::Percentage(10),
-                    ]
-                    .as_ref(),
-                )
-                .split(f.size());
-            Block::default()
-                .title(if odd { "+" } else { "-" })
-                .borders(Borders::ALL)
-                .render(&mut f, chunks[0]);
-            Block::default()
-                .title("Block 1")
-                .borders(Borders::ALL)
-                .render(&mut f, chunks[1]);
-            Block::default()
-                .title("Block 2")
-                .borders(Borders::ALL)
-                .render(&mut f, chunks[2]);
-        })?;
-    }
+    main_loop()
 }
